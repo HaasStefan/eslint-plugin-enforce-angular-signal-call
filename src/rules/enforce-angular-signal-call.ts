@@ -16,16 +16,51 @@ export const enforceAngularSignalCallRule = createRule({
     },
     defaultOptions: [],
     create(context) {
+
+        const {sourceCode} = context;
+
+        // Check if we have access to TypeScript's parser services
+        const services = sourceCode.parserServices;
+
+        if (!services || !services.program || !services.esTreeNodeToTSNodeMap) {
+            return {};
+        }
+
+        const checker = services.program.getTypeChecker();
+
         return {
-            CallExpression(node: TSESTree.CallExpression) {
-                const callee = node.callee;
-                if (callee.type === 'MemberExpression' && callee.object.type === 'Identifier' && callee.object.name === 'console' && callee.property.type === 'Identifier' && callee.property.name === 'log') {
-                    context.report({
-                        node,
-                        messageId: 'enforceAngularSignalCall',
-                    });
-                }
+            VariableDeclaration(node: TSESTree.VariableDeclaration) {
+                // do nothing
             },
+            AssignmentExpression(node: TSESTree.BinaryExpression) {
+                const variableNode = services.esTreeNodeToTSNodeMap?.get(node.left);
+
+                if (variableNode) {
+                    // Get the type of the variable using the type checker
+                    const type = checker.getTypeAtLocation(variableNode);
+
+                    // Convert the type to a readable string
+                    const typeName = checker.typeToString(type);
+
+                    console.log(typeName)
+
+                    if (isSignal(typeName)) {
+                        context.report({
+                            node: node,
+                            messageId: 'enforceAngularSignalCall',
+                        });
+                    }
+                }
+            }
         };
     },
 });
+
+
+type Signal = `Signal<${string}>` | `WritableSignal<${string}>` | `InputSignal<${string}>`;
+
+function isSignal(type: string): type is Signal {
+    const withoutGeneric = type.split('<')[0];
+
+    return !!withoutGeneric && ["Signal", "WritableSignal", "InputSignal"].includes(withoutGeneric);
+}
