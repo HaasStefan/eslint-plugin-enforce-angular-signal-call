@@ -7,10 +7,10 @@ export const enforceAngularSignalCallRule = createRule({
     meta: {
         type: 'suggestion',
         docs: {
-            description: 'Disallow console.log',
+            description: 'Enforce that Angular signals are called with the getter',
         },
         messages: {
-            enforceAngularSignalCall: 'Using console.log is not allowed.',
+            enforceAngularSignalCall: 'Angular signals should be called with the getter.',
         },
         schema: [], // No options
     },
