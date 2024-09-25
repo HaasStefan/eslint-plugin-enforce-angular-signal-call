@@ -1,10 +1,10 @@
 {
   "name": "eslint-plugin-yourplugin",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
     "test": "vitest",
-    "build": "tsc"
+    "build": "tsc",
+    "update:eslint-docs": "npm run build && npx eslint-doc-generator"
   },
   "keywords": [],
   "author": "",
@@ -15,8 +15,14 @@
   },
   "//": "Todo: Add peerDependencies",
   "peerDependencies": {
-
   },
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "main": "lib/index.js",
   "devDependencies": {
     "@eslint/js": "^9.11.1",
     "@types/eslint": "^9.6.1",

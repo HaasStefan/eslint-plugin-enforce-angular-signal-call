@@ -1,6 +1,6 @@
 import {ESLintUtils, TSESTree} from '@typescript-eslint/utils';
 
-const createRule = ESLintUtils.RuleCreator((name) => `https://your-plugin-docs.com/rule/${name}`);
+const createRule = ESLintUtils.RuleCreator((name) => `https://github.com/HaasStefan/eslint-plugin-enforce-angular-signal-call/tree/master/docs/rules/${name}.md`);
 
 export const enforceAngularSignalCallRule = createRule({
     name: 'enforce-angular-signal-call',
