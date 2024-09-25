@@ -1,0 +1,32 @@
+{
+  "name": "eslint-plugin-yourplugin",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@typescript-eslint/utils": "^8.7.0"
+  },
+  "//": "Todo: Add peerDependencies",
+  "peerDependencies": {
+
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.11.1",
+    "@types/eslint": "^9.6.1",
+    "@types/eslint__js": "^8.42.3",
+    "@types/node": "^22.0.2",
+    "@typescript-eslint/rule-tester": "^8.7.0",
+    "eslint": "^8.57.1",
+    "globals": "^15.9.0",
+    "typescript": "^5.6.2",
+    "typescript-eslint": "^8.7.0",
+    "vitest": "^2.1.1"
+  }
+}
