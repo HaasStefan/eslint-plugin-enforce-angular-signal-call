@@ -29,11 +29,8 @@ export const enforceAngularSignalCallRule = createRule({
         const checker = services.program.getTypeChecker();
 
         return {
-            VariableDeclaration(node: TSESTree.VariableDeclaration) {
-                // do nothing
-            },
-            AssignmentExpression(node: TSESTree.BinaryExpression) {
-                const variableNode = services.esTreeNodeToTSNodeMap?.get(node.left);
+            Identifier(node: TSESTree.Identifier) {
+                const variableNode = services.esTreeNodeToTSNodeMap?.get(node);
 
                 if (variableNode) {
                     // Get the type of the variable using the type checker
@@ -42,13 +39,49 @@ export const enforceAngularSignalCallRule = createRule({
                     // Convert the type to a readable string
                     const typeName = checker.typeToString(type);
 
-                    console.log(typeName)
-
                     if (isSignal(typeName)) {
-                        context.report({
-                            node: node,
-                            messageId: 'enforceAngularSignalCall',
-                        });
+                        const parent = node.parent;
+
+                        if (parent.type === 'AssignmentExpression') {
+                            context.report({
+                                node: node,
+                                messageId: 'enforceAngularSignalCall',
+                            });
+                        } else if (parent.type === 'MemberExpression') {
+                            const outerParent = visitAllMemberExpressionsAndGetParent(node);
+                            if (outerParent.type === 'AssignmentExpression' ||
+                                !(outerParent.type === 'CallExpression'
+                                    && outerParent.callee.type === 'MemberExpression'
+                                    && outerParent.callee.property.type === 'Identifier'
+                                    && (outerParent.callee.property.name === 'set' || outerParent.callee.property.name === 'update')
+                                )
+                                && !(outerParent.type === 'CallExpression' && outerParent.callee.type === 'Identifier' && outerParent.callee.name === 'untracked')
+                            ) {
+                                context.report({
+                                    node: node,
+                                    messageId: 'enforceAngularSignalCall',
+                                });
+                            }
+                        } else if (parent.type === 'CallExpression' && !(parent.callee.type === 'Identifier' && parent.callee.name === node.name)) {
+                            if (parent.callee.type === 'Identifier' && parent.callee.name === 'untracked') {
+                                return;
+                            }
+
+                            context.report({
+                                node: node,
+                                messageId: 'enforceAngularSignalCall',
+                            });
+                        } else if (parent.type === 'ArrowFunctionExpression') {
+                            context.report({
+                                node: node,
+                                messageId: 'enforceAngularSignalCall',
+                            });
+                        } else if (parent.type === 'VariableDeclarator' && parent.init && parent.init.type === 'Identifier' && parent.init.name === node.name) {
+                            context.report({
+                                node: node,
+                                messageId: 'enforceAngularSignalCall',
+                            });
+                        }
                     }
                 }
             }
@@ -63,4 +96,14 @@ function isSignal(type: string): type is Signal {
     const withoutGeneric = type.split('<')[0];
 
     return !!withoutGeneric && ["Signal", "WritableSignal", "InputSignal"].includes(withoutGeneric);
+}
+
+
+function visitAllMemberExpressionsAndGetParent(node: TSESTree.Identifier) {
+    let parent = node.parent;
+    while (parent.type === 'MemberExpression') {
+        parent = parent.parent;
+    }
+
+    return parent;
 }

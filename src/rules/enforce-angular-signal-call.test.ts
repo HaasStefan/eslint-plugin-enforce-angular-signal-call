@@ -57,6 +57,19 @@ ruleTester.run("enforce-angular-signal-call", enforceAngularSignalCallRule, {
         },
         {
             code: `
+            import {WritableSignal, signal} from "@angular/core";
+
+            class HelloWorld {
+                x: { y: WritableSignal<string> } = { y: signal("init") };
+                
+                constructor() {
+                    this.x.y.set("hello");
+                }
+            }
+            `
+        },
+        {
+            code: `
             import {WritableSignal, signal, effect, untracked} from "@angular/core";
 
             class HelloWorld {
@@ -112,7 +125,7 @@ ruleTester.run("enforce-angular-signal-call", enforceAngularSignalCallRule, {
              let x: WritableSignal<string> = signal("init");
               
             (() => {
-              const y = mySignal;
+              const y = x;
             })(); 
              `,  // Invalid case where signal is accessed but not called
             errors: [{messageId: 'enforceAngularSignalCall'}],
