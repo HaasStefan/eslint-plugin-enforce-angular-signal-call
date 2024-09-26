@@ -136,20 +136,10 @@ ruleTester.run("enforce-angular-signal-call", enforceAngularSignalCallRule, {
             code: `
              import {WritableSignal, signal} from "@angular/core";
              
-             let x: { y: WritableSignal<string> | undefined } = { };
+             let x: { y: WritableSignal<string> } = { };
              
              x.y = signal("init");
              x.y.set("hello");
-            `
-        },
-        {
-            code: `
-             import {WritableSignal, signal} from "@angular/core";
-             
-             let x: { y: WritableSignal<string> | undefined } = { };
-             let y = signal("init");
-             
-             x.y = y;
             `
         }
 

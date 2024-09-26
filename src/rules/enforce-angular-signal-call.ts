@@ -115,38 +115,6 @@ export const enforceAngularSignalCallRule = createRule({
                                     }
                                 }
                             }
-
-
-                            // if (parent.arguments.length > 0) {
-                            //     const argument = parent.arguments.find(arg => arg.type === 'Identifier' && arg.name === node.name);
-                            //
-                            //     if (argument) {
-                            //         const calleeNode = services.esTreeNodeToTSNodeMap?.get(parent.callee);
-                            //         const argumentNode = services.esTreeNodeToTSNodeMap?.get(argument);
-                            //
-                            //         if (!calleeNode) return;
-                            //         const signature = checker.getResolvedSignature(calleeNode);
-                            //
-                            //         if (argumentNode) {
-                            //             const paramType = signature.getParameters()[0];
-                            //
-                            //             const argumentType = checker.getTypeOfSymbolAtLocation(argumentNode, calleeNode);
-                            //             const argumentTypeName = checker.typeToString(argumentType);
-                            //
-                            //             console.log(argumentTypeName);
-                            //
-                            //             // If the argument type is a signal, report an issue if the signal isn't called with its getter
-                            //             if (!isSignal(argumentTypeName)) {
-                            //                 context.report({
-                            //                     node: node,
-                            //                     messageId: 'enforceAngularSignalCall',
-                            //                 });
-                            //             }
-                            //
-                            //         }
-                            //     }
-                            // }
-
                         } else if (parent.type === 'ArrowFunctionExpression') {
                             context.report({
                                 node: node,
