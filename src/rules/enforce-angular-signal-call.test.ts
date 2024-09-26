@@ -131,6 +131,26 @@ ruleTester.run("enforce-angular-signal-call", enforceAngularSignalCallRule, {
 
 }
             `
+        },
+        {
+            code: `
+             import {WritableSignal, signal} from "@angular/core";
+             
+             let x: { y: WritableSignal<string> | undefined } = { };
+             
+             x.y = signal("init");
+             x.y.set("hello");
+            `
+        },
+        {
+            code: `
+             import {WritableSignal, signal} from "@angular/core";
+             
+             let x: { y: WritableSignal<string> | undefined } = { };
+             let y = signal("init");
+             
+             x.y = y;
+            `
         }
 
     ],
@@ -138,8 +158,8 @@ ruleTester.run("enforce-angular-signal-call", enforceAngularSignalCallRule, {
         {
             name: 'x = "hello"',
             code: `
-             import {WritableSignal, signal} from "@angular/core";  
-             
+             import {WritableSignal, signal} from "@angular/core";
+
              let x: WritableSignal<string> = signal("init");
              x = "hello";
              `,  // Invalid case where signal is accessed but not called
@@ -148,34 +168,34 @@ ruleTester.run("enforce-angular-signal-call", enforceAngularSignalCallRule, {
         {
             name: 'console.log(x)',
             code: `
-             import {WritableSignal, signal} from "@angular/core";  
-             
+             import {WritableSignal, signal} from "@angular/core";
+
              let x: WritableSignal<string> = signal("init");
-              
-             console.log(x); 
+
+             console.log(x);
              `,  // Invalid case where signal is accessed but not called
             errors: [{messageId: 'enforceAngularSignalCall'}],
         },
         {
             name: 'let y = computed(() => x)',
             code: `
-             import {WritableSignal, signal, computed} from "@angular/core";  
-             
+             import {WritableSignal, signal, computed} from "@angular/core";
+
              let x: WritableSignal<string> = signal("init");
-             let y = computed(() => x); 
+             let y = computed(() => x);
              `,  // Invalid case where signal is accessed but not called
             errors: [{messageId: 'enforceAngularSignalCall'}],
         },
         {
             name: 'const y = mySignal',
             code: `
-             import {WritableSignal, signal} from "@angular/core";  
-             
+             import {WritableSignal, signal} from "@angular/core";
+
              let x: WritableSignal<string> = signal("init");
-              
+
             (() => {
               const y = x;
-            })(); 
+            })();
              `,  // Invalid case where signal is accessed but not called
             errors: [{messageId: 'enforceAngularSignalCall'}],
         },
@@ -183,13 +203,13 @@ ruleTester.run("enforce-angular-signal-call", enforceAngularSignalCallRule, {
             name: 'foo(x)',
             code: `
             import {WritableSignal, signal} from "@angular/core";
-            
+
             function foo(x: string) {
              console.log(x());
             }
-            
+
             let x: WritableSignal<string> = signal("init");
-            
+
             foo(x);
             `,
             errors: [{messageId: 'enforceAngularSignalCall'}],
