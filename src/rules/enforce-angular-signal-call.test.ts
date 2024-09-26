@@ -112,9 +112,9 @@ ruleTester.run("enforce-angular-signal-call", enforceAngularSignalCallRule, {
              console.log(x());
             }
             
-            let x: WritableSignal<string> = signal("init");
+            let y: WritableSignal<string> = signal("init");
             
-            foo(x);
+            foo(y);
             `
         },
         {

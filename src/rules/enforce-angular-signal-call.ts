@@ -88,28 +88,27 @@ export const enforceAngularSignalCallRule = createRule({
                                     if (signatures.length > 0) {
                                         const signature = signatures[0]; // First signature for simplicity
 
-                                        // Get the first parameter type (if exists)
-                                        if (signature.parameters.length > 0) {
-                                            const paramSymbol = signature.parameters.find(param => param.name === node.name);
+                                        if (signature.parameters.length > 0 && parent.arguments.length > 0) {
 
-                                            if (!paramSymbol) {
-                                                context.report({
-                                                    node: node,
-                                                    messageId: 'enforceAngularSignalCall',
-                                                });
-                                                return;
-                                            }
+                                            for (let i = 0; i < Math.min(signature.parameters.length, parent.arguments.length); i++) {
+                                                const paramSymbol = signature.parameters[i];
+                                                const arg = parent.arguments[i];
+                                                const argTsNode = services.esTreeNodeToTSNodeMap?.get(arg);
 
-                                            // Get the type of the first parameter
-                                            const paramType = checker.getTypeOfSymbolAtLocation(paramSymbol, calleeTsNode);
-                                            const paramTypeName = checker.typeToString(paramType);
+                                                if (argTsNode) {
+                                                    const argType = checker.getTypeAtLocation(argTsNode);
+                                                    const paramType = checker.getTypeOfSymbolAtLocation(paramSymbol, calleeTsNode);
+                                                    const paramTypeName = checker.typeToString(paramType);
 
-                                            // If the parameter type should be a signal, enforce the signal getter rule
-                                            if (!(isSignal(paramTypeName) || paramTypeName === 'any')) {
-                                                context.report({
-                                                    node: node,
-                                                    messageId: 'enforceAngularSignalCall',
-                                                });
+                                                    // If the parameter type is a signal, enforce the signal getter rule
+                                                    if (!isSignal(paramTypeName) && isSignal(checker.typeToString(argType))) {
+                                                        context.report({
+                                                            node: node,
+                                                            messageId: 'enforceAngularSignalCall',
+                                                        });
+                                                        return;
+                                                    }
+                                                }
                                             }
                                         }
                                     }
