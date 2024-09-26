@@ -83,6 +83,16 @@ ruleTester.run("enforce-angular-signal-call", enforceAngularSignalCallRule, {
             }
             `
         },
+        {
+            code: `
+            import {WritableSignal, signal, computed} from "@angular/core";
+            
+            class Progress {
+              readonly mode: WritableSignal<ProgressMode | null> = signal<ProgressMode | null>(null);
+              readonly isBusy = computed(() => this.mode() !== null);
+            }
+            `
+        }
 
     ],
     invalid: [

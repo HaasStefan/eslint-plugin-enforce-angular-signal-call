@@ -53,7 +53,6 @@ export const enforceAngularSignalCallRule = createRule({
                                 !(outerParent.type === 'CallExpression'
                                     && outerParent.callee.type === 'MemberExpression'
                                     && outerParent.callee.property.type === 'Identifier'
-                                    && (outerParent.callee.property.name === 'set' || outerParent.callee.property.name === 'update')
                                 )
                                 && !(outerParent.type === 'CallExpression' && outerParent.callee.type === 'Identifier' && outerParent.callee.name === 'untracked')
                             ) {
