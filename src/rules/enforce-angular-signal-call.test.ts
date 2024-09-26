@@ -191,6 +191,21 @@ ruleTester.run("enforce-angular-signal-call", enforceAngularSignalCallRule, {
             errors: [{messageId: 'enforceAngularSignalCall'}],
         },
         {
+            name: 'class console.log(this.x)',
+            code: `
+             import {WritableSignal, signal} from "@angular/core";
+
+             class Test {
+              x: WritableSignal<string> = signal("init");
+              
+              constructor() {
+               console.log(this.x);
+              }
+             }
+             `,  // Invalid case where signal is accessed but not called
+            errors: [{messageId: 'enforceAngularSignalCall'}],
+        },
+        {
             name: 'console.log(x)',
             code: `
              import {WritableSignal, signal} from "@angular/core";

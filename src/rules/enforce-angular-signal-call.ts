@@ -43,7 +43,7 @@ export const enforceAngularSignalCallRule = createRule({
                         const parent = node.parent;
 
 
-                        const checkCallExpression = () => {
+                        const checkCallExpression = (parent: TSESTree.Node ) => {
                             if (parent.type !== 'CallExpression') return;
 
                             if (parent.callee.type === 'Identifier' && parent.callee.name === 'untracked') {
@@ -122,6 +122,11 @@ export const enforceAngularSignalCallRule = createRule({
                                 }
                                 return; // Early exit if the key is not an Identifier
                             }
+
+                            if (outerParent.type === 'CallExpression') {
+                                checkCallExpression(outerParent);
+                            }
+
                             if (outerParent.type === 'AssignmentExpression' ||
                                 !(outerParent.type === 'CallExpression'
                                     && outerParent.callee.type === 'MemberExpression'
@@ -130,7 +135,7 @@ export const enforceAngularSignalCallRule = createRule({
                                 && !(outerParent.type === 'CallExpression' && outerParent.callee.type === 'Identifier' && outerParent.callee.name === 'untracked')
                             ) {
                                 if (outerParent.type === 'CallExpression') {
-                                    checkCallExpression();
+                                    checkCallExpression(outerParent);
                                 } else {
                                     context.report({
                                         node: node,
@@ -139,7 +144,7 @@ export const enforceAngularSignalCallRule = createRule({
                                 }
                             }
                         } else if (parent.type === 'CallExpression' && !(parent.callee.type === 'Identifier' && parent.callee.name === node.name)) {
-                            checkCallExpression();
+                            checkCallExpression(parent);
                         } else if (parent.type === 'ArrowFunctionExpression') {
                             context.report({
                                 node: node,
