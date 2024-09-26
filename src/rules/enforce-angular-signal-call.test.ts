@@ -108,6 +108,24 @@ ruleTester.run("enforce-angular-signal-call", enforceAngularSignalCallRule, {
             code: `
             import {WritableSignal, signal} from "@angular/core";
             
+            function             foo(x: WritableSignal<any>) {
+             console.log(x());
+            }
+            
+            class Test {        
+            y: WritableSignal<string> = signal("init");
+            
+           
+            constructor() {
+             foo(this.y);
+            }
+            } 
+            `
+        },
+        {
+            code: `
+            import {WritableSignal, signal} from "@angular/core";
+            
             function foo(x: WritableSignal<any>) {
              console.log(x());
             }

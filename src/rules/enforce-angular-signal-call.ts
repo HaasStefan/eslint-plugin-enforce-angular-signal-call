@@ -42,34 +42,10 @@ export const enforceAngularSignalCallRule = createRule({
                     if (isSignal(typeName)) {
                         const parent = node.parent;
 
-                        if (parent.type === 'AssignmentExpression') {
-                            context.report({
-                                node: node,
-                                messageId: 'enforceAngularSignalCall',
-                            });
-                        } else if (parent.type === 'MemberExpression') {
-                            const outerParent = visitAllMemberExpressionsAndGetParent(node);
 
-                            if (outerParent.type === 'PropertyDefinition') return;
+                        const checkCallExpression = () => {
+                            if (parent.type !== 'CallExpression') return;
 
-                            if (outerParent.type === 'AssignmentExpression'
-                                && outerParent.right.type === 'CallExpression'
-                                && isSignalAssignment(outerParent.right))
-                                return;
-
-                            if (outerParent.type === 'AssignmentExpression' ||
-                                !(outerParent.type === 'CallExpression'
-                                    && outerParent.callee.type === 'MemberExpression'
-                                    && outerParent.callee.property.type === 'Identifier'
-                                )
-                                && !(outerParent.type === 'CallExpression' && outerParent.callee.type === 'Identifier' && outerParent.callee.name === 'untracked')
-                            ) {
-                                context.report({
-                                    node: node,
-                                    messageId: 'enforceAngularSignalCall',
-                                });
-                            }
-                        } else if (parent.type === 'CallExpression' && !(parent.callee.type === 'Identifier' && parent.callee.name === node.name)) {
                             if (parent.callee.type === 'Identifier' && parent.callee.name === 'untracked') {
                                 return;
                             }
@@ -114,6 +90,41 @@ export const enforceAngularSignalCallRule = createRule({
                                     }
                                 }
                             }
+                        }
+
+                        if (parent.type === 'AssignmentExpression') {
+                            context.report({
+                                node: node,
+                                messageId: 'enforceAngularSignalCall',
+                            });
+                        } else if (parent.type === 'MemberExpression') {
+                            const outerParent = visitAllMemberExpressionsAndGetParent(node);
+
+                            if (outerParent.type === 'PropertyDefinition') return;
+
+                            if (outerParent.type === 'AssignmentExpression'
+                                && outerParent.right.type === 'CallExpression'
+                                && isSignalAssignment(outerParent.right))
+                                return;
+
+                            if (outerParent.type === 'AssignmentExpression' ||
+                                !(outerParent.type === 'CallExpression'
+                                    && outerParent.callee.type === 'MemberExpression'
+                                    && outerParent.callee.property.type === 'Identifier'
+                                )
+                                && !(outerParent.type === 'CallExpression' && outerParent.callee.type === 'Identifier' && outerParent.callee.name === 'untracked')
+                            ) {
+                                if (outerParent.type === 'CallExpression') {
+                                    checkCallExpression();
+                                } else {
+                                    context.report({
+                                        node: node,
+                                        messageId: 'enforceAngularSignalCall',
+                                    });
+                                }
+                            }
+                        } else if (parent.type === 'CallExpression' && !(parent.callee.type === 'Identifier' && parent.callee.name === node.name)) {
+                            checkCallExpression();
                         } else if (parent.type === 'ArrowFunctionExpression') {
                             context.report({
                                 node: node,
