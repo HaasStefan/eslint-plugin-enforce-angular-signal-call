@@ -107,6 +107,21 @@ export const enforceAngularSignalCallRule = createRule({
                                 && isSignalAssignment(outerParent.right))
                                 return;
 
+                            if (outerParent.type === 'Property') {
+                                // Check if the property key itself is a signal
+                                const keyNode = outerParent.key;
+
+                                if (keyNode.type === 'Identifier') {
+                                    const keyTsNode = services.esTreeNodeToTSNodeMap?.get(keyNode);
+                                    if (keyTsNode) {
+                                        const keyType = checker.getTypeAtLocation(keyTsNode);
+                                        if (isSignal(checker.typeToString(keyType))) {
+                                            return; // Early exit if the key itself is a signal
+                                        }
+                                    }
+                                }
+                                return; // Early exit if the key is not an Identifier
+                            }
                             if (outerParent.type === 'AssignmentExpression' ||
                                 !(outerParent.type === 'CallExpression'
                                     && outerParent.callee.type === 'MemberExpression'
