@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-enforce-angular-signal-call-temp",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "scripts": {
     "test": "vitest",
     "build": "tsc",
