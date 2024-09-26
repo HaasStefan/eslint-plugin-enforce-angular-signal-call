@@ -92,6 +92,45 @@ ruleTester.run("enforce-angular-signal-call", enforceAngularSignalCallRule, {
               readonly isBusy = computed(() => this.mode() !== null);
             }
             `
+        },
+        {
+            code: `
+            import {WritableSignal, signal} from "@angular/core";
+            
+             class Test {
+              private readonly x: WritableSignal<string> = signal("init");
+              
+              readonly y = this.x;
+              }
+            `
+        },
+        {
+            code: `
+            import {WritableSignal, signal} from "@angular/core";
+            
+            function foo(x: WritableSignal<any>) {
+             console.log(x());
+            }
+            
+            let x: WritableSignal<string> = signal("init");
+            
+            foo(x);
+            `
+        },
+        {
+            code: `
+            
+            import {WritableSignal, signal} from "@angular/core";
+            
+            class Test {
+              something: WritableSignal<any>;
+  
+  constructor() {
+    this.something = signal<any>(undefined);
+  }
+
+}
+            `
         }
 
     ],
@@ -138,6 +177,21 @@ ruleTester.run("enforce-angular-signal-call", enforceAngularSignalCallRule, {
               const y = x;
             })(); 
              `,  // Invalid case where signal is accessed but not called
+            errors: [{messageId: 'enforceAngularSignalCall'}],
+        },
+        {
+            name: 'foo(x)',
+            code: `
+            import {WritableSignal, signal} from "@angular/core";
+            
+            function foo(x: string) {
+             console.log(x());
+            }
+            
+            let x: WritableSignal<string> = signal("init");
+            
+            foo(x);
+            `,
             errors: [{messageId: 'enforceAngularSignalCall'}],
         },
     ],

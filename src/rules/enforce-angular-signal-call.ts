@@ -10,7 +10,7 @@ export const enforceAngularSignalCallRule = createRule({
             description: 'Enforce that Angular signals are called with the getter',
         },
         messages: {
-            enforceAngularSignalCall: 'Angular signals should be called with the getter.',
+            enforceAngularSignalCall: 'An Angular signal should be called with its getter method',
         },
         schema: [], // No options
     },
@@ -49,6 +49,14 @@ export const enforceAngularSignalCallRule = createRule({
                             });
                         } else if (parent.type === 'MemberExpression') {
                             const outerParent = visitAllMemberExpressionsAndGetParent(node);
+
+                            if (outerParent.type === 'PropertyDefinition') return;
+
+                            if (outerParent.type === 'AssignmentExpression'
+                                && outerParent.right.type === 'CallExpression'
+                                && isSignalAssignment(outerParent.right))
+                                return;
+
                             if (outerParent.type === 'AssignmentExpression' ||
                                 !(outerParent.type === 'CallExpression'
                                     && outerParent.callee.type === 'MemberExpression'
@@ -66,10 +74,79 @@ export const enforceAngularSignalCallRule = createRule({
                                 return;
                             }
 
-                            context.report({
-                                node: node,
-                                messageId: 'enforceAngularSignalCall',
-                            });
+                            if (parent.callee.type === 'Identifier' || parent.callee.type === 'MemberExpression') {
+                                // Get the TypeScript AST node for the callee (the function being called)
+                                const calleeTsNode = services.esTreeNodeToTSNodeMap?.get(parent.callee);
+
+                                if (calleeTsNode) {
+                                    // Get the type of the function being called
+                                    const calleeType = checker.getTypeAtLocation(calleeTsNode);
+
+                                    // Get the function signature (we assume it's a function call)
+                                    const signatures = calleeType.getCallSignatures();
+
+                                    if (signatures.length > 0) {
+                                        const signature = signatures[0]; // First signature for simplicity
+
+                                        // Get the first parameter type (if exists)
+                                        if (signature.parameters.length > 0) {
+                                            const paramSymbol = signature.parameters.find(param => param.name === node.name);
+
+                                            if (!paramSymbol) {
+                                                context.report({
+                                                    node: node,
+                                                    messageId: 'enforceAngularSignalCall',
+                                                });
+                                                return;
+                                            }
+
+                                            // Get the type of the first parameter
+                                            const paramType = checker.getTypeOfSymbolAtLocation(paramSymbol, calleeTsNode);
+                                            const paramTypeName = checker.typeToString(paramType);
+
+                                            // If the parameter type should be a signal, enforce the signal getter rule
+                                            if (!(isSignal(paramTypeName) || paramTypeName === 'any')) {
+                                                context.report({
+                                                    node: node,
+                                                    messageId: 'enforceAngularSignalCall',
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+
+                            // if (parent.arguments.length > 0) {
+                            //     const argument = parent.arguments.find(arg => arg.type === 'Identifier' && arg.name === node.name);
+                            //
+                            //     if (argument) {
+                            //         const calleeNode = services.esTreeNodeToTSNodeMap?.get(parent.callee);
+                            //         const argumentNode = services.esTreeNodeToTSNodeMap?.get(argument);
+                            //
+                            //         if (!calleeNode) return;
+                            //         const signature = checker.getResolvedSignature(calleeNode);
+                            //
+                            //         if (argumentNode) {
+                            //             const paramType = signature.getParameters()[0];
+                            //
+                            //             const argumentType = checker.getTypeOfSymbolAtLocation(argumentNode, calleeNode);
+                            //             const argumentTypeName = checker.typeToString(argumentType);
+                            //
+                            //             console.log(argumentTypeName);
+                            //
+                            //             // If the argument type is a signal, report an issue if the signal isn't called with its getter
+                            //             if (!isSignal(argumentTypeName)) {
+                            //                 context.report({
+                            //                     node: node,
+                            //                     messageId: 'enforceAngularSignalCall',
+                            //                 });
+                            //             }
+                            //
+                            //         }
+                            //     }
+                            // }
+
                         } else if (parent.type === 'ArrowFunctionExpression') {
                             context.report({
                                 node: node,
@@ -105,4 +182,9 @@ function visitAllMemberExpressionsAndGetParent(node: TSESTree.Identifier) {
     }
 
     return parent;
+}
+
+
+function isSignalAssignment(node: TSESTree.CallExpression) {
+    return node.callee.type === 'Identifier' && node.callee.name === 'signal';
 }

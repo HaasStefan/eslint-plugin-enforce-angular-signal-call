@@ -1,10 +1,11 @@
 {
-  "name": "eslint-plugin-enforce-angular-signal-call",
-  "version": "1.0.0",
+  "name": "eslint-plugin-enforce-angular-signal-call-temp",
+  "version": "1.0.2",
   "scripts": {
     "test": "vitest",
     "build": "tsc",
-    "update:eslint-docs": "npm run build && npx eslint-doc-generator"
+    "update:eslint-docs": "npm run build && npx eslint-doc-generator",
+    "deploy": "npm run build && npm publish"
   },
   "keywords": [],
   "author": "",
