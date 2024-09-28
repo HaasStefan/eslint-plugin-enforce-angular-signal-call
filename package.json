@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-enforce-angular-signal-call",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "scripts": {
     "test": "vitest",
     "build": "tsc",
@@ -9,8 +9,8 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "description": "",
+  "license": "MIT",
+  "description": "An eslint plugin that enforces Angular signals to be called via their getter",
   "dependencies": {
   },
   "peerDependencies": {

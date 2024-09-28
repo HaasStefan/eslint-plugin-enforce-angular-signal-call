@@ -19,11 +19,11 @@ An eslint plugin which enforces that Angular signals are called with the getter.
 
 const mySignal = signal(false);
 
-console.log(mySignal); // ⚠️
+console.log(mySignal); // ❌
 
 console.log(mySignal()); // ✅
 
-if (mySignal) { // ⚠️
+if (mySignal) { // ❌
   console.log('mySignal is truthy');
 }
 
