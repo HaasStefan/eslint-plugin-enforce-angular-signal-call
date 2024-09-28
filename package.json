@@ -11,6 +11,10 @@
   "author": "",
   "license": "MIT",
   "description": "An eslint plugin that enforces Angular signals to be called via their getter",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HaasStefan/eslint-plugin-enforce-angular-signal-call.git"
+  },
   "dependencies": {
   },
   "peerDependencies": {
